@@ -5,17 +5,12 @@
 {
     "appid"        "721450"
     "desc"         "CC2 build"
-
-    // Folder where SteamPipe will put build logs and intermediate files
     "buildoutput"  "..\\build_output"
-
-    // Branch to set live after a successful build (e.g. default, public, beta)
     "setlive"      "default"
-
+    
     "depots"
     {
-        // Replace <DEPOT_ID_WINDOWS> with your real Windows depot ID from Steamworks
-        "<DEPOT_ID_WINDOWS>"    "depot_build_721450_win.vdf"
+        "721459"    "depot_build_721450_win.vdf"
     }
 }
 

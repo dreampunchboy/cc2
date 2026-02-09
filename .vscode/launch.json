@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Launcher/bin/Debug/net8.0/CC2.Launcher.dll",
+            "program": "${workspaceFolder}/Launcher/bin/Debug/net8.0/game.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Launcher",
             "stopAtEntry": false,

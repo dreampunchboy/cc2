@@ -3,23 +3,16 @@
 
 "DepotBuildConfig"
 {
-    "appid"        "721450"
-    "depotid"      "721451"
-
-    // Root of your game content for this depot. Here we assume you run the
-    // build from the Steam ContentBuilder and point this to your published
-    // CC2 build folder (the one that contains CC2.Launcher.exe and Game/).
-    "contentroot"  "..\\..\\publish"
-
+    "DepotID"      "721459"
+    "ContentRoot"  "C:\\Business\\Game Development\\Projects\\CC2\\publish"
+    
     "FileMapping"
     {
-        // Include everything under contentroot
-        "LocalPath" "."
+        "LocalPath" "*"
         "DepotPath" "."
         "recursive" "1"
     }
-
-    // Optional: exclude symbols or other dev-only files
+    
     "FileExclusion" "*.pdb"
 }
 

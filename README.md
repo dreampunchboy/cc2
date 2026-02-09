@@ -48,7 +48,7 @@ Then copy the `Game/` folder next to the published output:
 
 ```
 publish/
-  CC2.Launcher.exe
+  game.exe
   Game/
     index.html
     css/
@@ -76,7 +76,7 @@ For live testing and release on your real Steam app:
    - Ensure the output looks like:
    ```
    publish/
-     CC2.Launcher.exe
+     game.exe
      Game/
        index.html
        css/
@@ -84,7 +84,7 @@ For live testing and release on your real Steam app:
    ```
    - Do **not** include `steam_appid.txt` in this folder when uploading to Steam.
 3. **Configure Steamworks (app 721450)**
-   - In the Steamworks partner site, set the app's **launch executable** to `CC2.Launcher.exe` at the root of the depot.
+   - In the Steamworks partner site, set the app's **launch executable** to `game.exe` at the root of the depot.
    - Create a **Windows depot** that uses the `publish/` folder as its content root.
 4. **Use SteamPipe scripts (templates in `steam/`)**
    - Edit `steam/app_build_721450.vdf` and `steam/depot_build_721450_win.vdf` to match your depot ID and desired branch.
@@ -98,7 +98,7 @@ For live testing and release on your real Steam app:
 ```
 CC2/
   Launcher/                    C# .NET 8 Console App
-    CC2.Launcher.csproj        Project file
+    CC2.Launcher.csproj        Project file (outputs game.exe)
     Program.cs                 Entry point (server + browser + Steam loop)
     SteamBridge.cs             Steamworks.NET wrapper
     GameServer.cs              Kestrel HTTP server + REST API
