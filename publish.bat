@@ -56,10 +56,10 @@ echo ========================================
 echo Copying Steamworks native DLLs...
 echo ========================================
 
-REM Steamworks.NET requires steam_api64.dll next to the executable for P/Invoke to work.
-set "STEAM_SDK_REDIST=C:\Software\steamworks_sdk\sdk\redistributable_bin\win64"
-if exist "%STEAM_SDK_REDIST%\steam_api64.dll" (
-    copy /Y "%STEAM_SDK_REDIST%\steam_api64.dll" "%PUBLISH_DIR%\steam_api64.dll" >nul
+REM Use bundled steam_api64.dll (SDK 1.60 from Steamworks.NET) - matches Steamworks.NET 2024.8.0
+set "STEAM_DLL=%LAUNCHER_DIR%\lib\steam_api64.dll"
+if exist "%STEAM_DLL%" (
+    copy /Y "%STEAM_DLL%" "%PUBLISH_DIR%\steam_api64.dll" >nul
     if errorlevel 1 (
         echo ERROR: Failed to copy steam_api64.dll
         pause
@@ -67,8 +67,9 @@ if exist "%STEAM_SDK_REDIST%\steam_api64.dll" (
     )
     echo steam_api64.dll copied successfully.
 ) else (
-    echo ERROR: steam_api64.dll not found at %STEAM_SDK_REDIST%
-    echo Make sure the Steamworks SDK is installed at C:\Software\steamworks_sdk
+    echo ERROR: steam_api64.dll not found at %STEAM_DLL%
+    echo Run: Invoke-WebRequest -Uri "https://github.com/rlabrecque/Steamworks.NET/releases/download/2024.8.0/Steamworks.NET-Standalone_2024.8.0.zip" -OutFile steamworks.zip
+    echo Then extract Windows-x64/steam_api64.dll to Launcher\lib\
     pause
     exit /b 1
 )

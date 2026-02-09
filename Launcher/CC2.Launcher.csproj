@@ -14,11 +14,12 @@
   </ItemGroup>
 
   <!-- Copy Steam files to output for local development (dotnet run, F5, etc.) -->
+  <!-- Uses bundled steam_api64.dll from Steamworks.NET Standalone (SDK 1.60) for compatibility -->
   <Target Name="CopySteamFiles" AfterTargets="Build">
-    <Copy SourceFiles="C:\Software\steamworks_sdk\sdk\redistributable_bin\win64\steam_api64.dll"
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\lib\steam_api64.dll"
           DestinationFolder="$(OutputPath)"
           SkipUnchangedFiles="true"
-          Condition="Exists('C:\Software\steamworks_sdk\sdk\redistributable_bin\win64\steam_api64.dll')" />
+          Condition="Exists('$(MSBuildProjectDirectory)\lib\steam_api64.dll')" />
     <!-- steam_appid.txt lets SteamAPI.Init() find your app when running outside Steam -->
     <Copy SourceFiles="$(MSBuildProjectDirectory)\..\steam_appid.txt"
           DestinationFolder="$(OutputPath)"
