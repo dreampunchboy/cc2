@@ -1,14 +1,12 @@
 @echo off
 setlocal
 
-REM WARNING: This script contains plain-text credentials. 
-REM Do NOT commit it to source control or share it.
-
 REM Get the project root (where this batch file is located)
 set "PROJECT_ROOT=%~dp0"
 set "LAUNCHER_DIR=%PROJECT_ROOT%Launcher"
 set "PUBLISH_DIR=%PROJECT_ROOT%publish"
 set "GAME_DIR=%PROJECT_ROOT%Game"
+set "CONTENTBUILDER_CONTENT=C:\Software\steamworks_sdk\sdk\tools\ContentBuilder\content"
 
 echo ========================================
 echo Building CC2 Launcher...
@@ -59,7 +57,6 @@ echo Copying Steamworks native DLLs...
 echo ========================================
 
 REM Steamworks.NET requires steam_api64.dll next to the executable for P/Invoke to work.
-REM Copy from the Steamworks SDK redistributable folder.
 set "STEAM_SDK_REDIST=C:\Software\steamworks_sdk\sdk\redistributable_bin\win64"
 if exist "%STEAM_SDK_REDIST%\steam_api64.dll" (
     copy /Y "%STEAM_SDK_REDIST%\steam_api64.dll" "%PUBLISH_DIR%\steam_api64.dll" >nul
@@ -78,32 +75,25 @@ if exist "%STEAM_SDK_REDIST%\steam_api64.dll" (
 
 echo.
 echo ========================================
-echo Uploading to Steam...
+echo Copying to ContentBuilder content...
 echo ========================================
 
-REM Path to SteamCMD (adjust if your SDK is in a different location)
-set "STEAMCMD_EXE=C:\Software\steamworks_sdk\sdk\tools\ContentBuilder\builder\steamcmd.exe"
-
-REM Path to steam folder (where the VDF files live)
-set "STEAM_DIR=%PROJECT_ROOT%steam"
-
-REM App build script
-set "APP_BUILD_VDF=%STEAM_DIR%\app_build_721450.vdf"
-
-"%STEAMCMD_EXE%" ^
-  +login visionhitman "Jkuo8501.S" ^
-  +run_app_build_http "%APP_BUILD_VDF%" ^
-  +quit
-
+REM Copy contents of publish folder to ContentBuilder content
+if not exist "%CONTENTBUILDER_CONTENT%" (
+    mkdir "%CONTENTBUILDER_CONTENT%"
+)
+xcopy /E /I /Y "%PUBLISH_DIR%\*" "%CONTENTBUILDER_CONTENT%\"
 if errorlevel 1 (
-    echo.
-    echo ERROR: Steam upload failed
+    echo ERROR: Failed to copy to ContentBuilder content
     pause
     exit /b 1
 )
 
 echo.
 echo ========================================
-echo Build and upload completed successfully!
+echo Publish completed successfully!
+echo ========================================
+echo Output: %PUBLISH_DIR%
+echo ContentBuilder: %CONTENTBUILDER_CONTENT%
 echo ========================================
 pause
