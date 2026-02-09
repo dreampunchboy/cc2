@@ -53,14 +53,45 @@ publish/
     index.html
     css/
     js/
-  steam_appid.txt    (remove for production — use Steamworks app config instead)
+  steam_appid.txt    (dev-only; do not include in Steam builds)
 ```
 
 ### 3. Steam Integration
 
-- `steam_appid.txt` contains `480` (Valve's Spacewar test app) for local development
-- For production, replace `480` with your real Steam App ID
-- Remove `steam_appid.txt` entirely when shipping — Steam provides the app ID at runtime
+- `steam_appid.txt` contains your real app ID `721450` for **local development when running the launcher directly** (not via Steam).
+- When launching the game via the **Steam client**, Steam provides the App ID automatically and `steam_appid.txt` is ignored.
+- For **shipping Steam builds**, remove `steam_appid.txt` from the final package so your live app ID only comes from Steam.
+
+### 4. Steam publishing workflow (app 721450)
+
+For live testing and release on your real Steam app:
+
+1. **Build the launcher**
+   - From the `Launcher/` folder:
+   ```bash
+   cd Launcher
+   dotnet publish -c Release -r win-x64 --self-contained true -o ../publish
+   ```
+2. **Assemble the Steam content folder**
+   - Ensure the output looks like:
+   ```
+   publish/
+     CC2.Launcher.exe
+     Game/
+       index.html
+       css/
+       js/
+   ```
+   - Do **not** include `steam_appid.txt` in this folder when uploading to Steam.
+3. **Configure Steamworks (app 721450)**
+   - In the Steamworks partner site, set the app's **launch executable** to `CC2.Launcher.exe` at the root of the depot.
+   - Create a **Windows depot** that uses the `publish/` folder as its content root.
+4. **Use SteamPipe scripts (templates in `steam/`)**
+   - Edit `steam/app_build_721450.vdf` and `steam/depot_build_721450_win.vdf` to match your depot ID and desired branch.
+   - Run `steamcmd` with `app_build_721450.vdf` to upload a new build.
+5. **Test live via Steam**
+   - From your Steam Library, install/update app `721450` and launch it.
+   - The game should run **online through Steam**, and the launcher/REST API will see real Steam user/achievement data instead of mock values.
 
 ## Project Structure
 
