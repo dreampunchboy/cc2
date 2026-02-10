@@ -16,6 +16,4 @@
     <ProjectReference Include="..\Client\BG.Client.csproj" />
     <ProjectReference Include="..\Shared\BG.Shared.csproj" />
   </ItemGroup>
-
-
 </Project>

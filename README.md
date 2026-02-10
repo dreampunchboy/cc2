@@ -4,11 +4,15 @@ Office clicker game built with Blazor WebAssembly (hosted). Excel-style grid UI;
 
 ## Run (development)
 
+Open the solution in **Visual Studio** and run the **Server** project (F5). The host starts and opens the browser.
+
+Or from the command line:
+
 ```bash
 dotnet run --project Server
 ```
 
-Starts the host at http://localhost:5000 and opens the browser.
+(Use `--launch-profile BG.Server` for port 5079.)
 
 ## Build
 
