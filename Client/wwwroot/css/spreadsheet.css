@@ -28,7 +28,7 @@
 }
 
 .spreadsheet-cell--header {
-  background: #252526;
+  background: #0d0d0d;
   color: #cccccc;
   font-weight: 600;
 }
@@ -60,7 +60,7 @@
 }
 
 .spreadsheet-cell--total-row {
-  background: #252526 !important;
+  background: #0d0d0d !important;
   color: #cccccc;
   font-weight: 600;
 }
@@ -98,12 +98,12 @@
 }
 
 .excel-grid-cell-wrapper .spreadsheet-cell--header {
-  background: #252526 !important;
+  background: #0d0d0d !important;
   color: #fff !important;
 }
 
 .excel-grid-cell-wrapper .spreadsheet-cell--total-row {
-  background: #252526 !important;
+  background: #0d0d0d !important;
   color: #cccccc !important;
   font-weight: 600;
 }

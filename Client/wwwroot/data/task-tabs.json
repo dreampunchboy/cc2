@@ -6,11 +6,11 @@
     "perSecondKey": "productivityPerSecond",
     "unlockAtRoleOrder": 0,
     "upgrades": [
-      { "id": "junior-assistant", "name": "Junior Assistant", "description": "Processes emails faster", "baseCost": 15, "costMultiplier": 1.15, "effectAmount": 1, "effectTime": 10, "unlockAtRoleOrder": 0 },
-      { "id": "inbox-rules", "name": "Inbox Rules", "description": "Auto-sort and flag", "baseCost": 50, "costMultiplier": 1.2, "effectAmount": 3, "effectTime": 10, "unlockAtRoleOrder": 0 },
-      { "id": "outlook-macros", "name": "Outlook Macros", "description": "Batch actions", "baseCost": 200, "costMultiplier": 1.2, "effectAmount": 1, "effectTime": 1, "unlockAtRoleOrder": 0 },
-      { "id": "ai-auto-reply", "name": "AI Auto-Reply", "description": "AI drafts replies", "baseCost": 800, "costMultiplier": 1.25, "effectAmount": 5, "effectTime": 1, "unlockAtRoleOrder": 1 },
-      { "id": "offshore-team", "name": "Offshore Team", "description": "24/7 email handling", "baseCost": 4000, "costMultiplier": 1.3, "effectAmount": 25, "effectTime": 1, "unlockAtRoleOrder": 1 }
+      { "id": "send-client-email", "name": "Send client email", "description": "Send an email to a client", "baseCost": 15, "costMultiplier": 1.15, "effectAmount": 1, "effectTime": 10, "unlockAtRoleOrder": 0 },
+      { "id": "email-colleagues", "name": "Email colleagues", "description": "Email your colleagues", "baseCost": 50, "costMultiplier": 1.2, "effectAmount": 3, "effectTime": 10, "unlockAtRoleOrder": 0 },
+      { "id": "send-marketing-email", "name": "Send Marketing email", "description": "Send a marketing email", "baseCost": 200, "costMultiplier": 1.2, "effectAmount": 1, "effectTime": 1, "unlockAtRoleOrder": 0 },
+      { "id": "bulk-email-marketing", "name": "Bulk email marketing", "description": "Send bulk marketing emails", "baseCost": 800, "costMultiplier": 1.25, "effectAmount": 5, "effectTime": 1, "unlockAtRoleOrder": 1 },
+      { "id": "email-boss", "name": "Email boss", "description": "Email your boss", "baseCost": 4000, "costMultiplier": 1.3, "effectAmount": 25, "effectTime": 1, "unlockAtRoleOrder": 1 }
     ]
   },
   {
