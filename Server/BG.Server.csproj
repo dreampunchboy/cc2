@@ -9,9 +9,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BG.Client\BG.Client.csproj" />
+    <ProjectReference Include="..\Client\BG.Client.csproj" />
+    <ProjectReference Include="..\HostSetup\HostSetup.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Shared\BG.Shared.csproj" />
   </ItemGroup>
+
+  <!-- Copy HostSetup.exe to output so the server can run it for custom URL setup (build and publish) -->
+  <Target Name="CopyHostSetup" AfterTargets="Build">
+    <PropertyGroup>
+      <_HostSetupExePath>$(ProjectDir)..\HostSetup\bin\$(Configuration)\net8.0\HostSetup.exe</_HostSetupExePath>
+    </PropertyGroup>
+    <Copy SourceFiles="$(_HostSetupExePath)" DestinationFolder="$(OutputPath)" Condition="Exists('$(_HostSetupExePath)')" />
+  </Target>
+  <Target Name="CopyHostSetupToPublish" AfterTargets="Publish" DependsOnTargets="CopyHostSetup">
+    <PropertyGroup>
+      <_HostSetupExePath>$(ProjectDir)..\HostSetup\bin\$(Configuration)\net8.0\HostSetup.exe</_HostSetupExePath>
+    </PropertyGroup>
+    <Copy SourceFiles="$(_HostSetupExePath)" DestinationFolder="$(PublishDir)" Condition="Exists('$(_HostSetupExePath)')" />
+  </Target>
 
   <!-- BG.Client is a referenced web app; we only want its DLL and content, not its executable -->
   <Target Name="ExcludeClientExeFromPublish" AfterTargets="ComputeFilesToPublish">

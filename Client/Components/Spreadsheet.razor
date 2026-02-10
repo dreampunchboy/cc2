@@ -1,0 +1,165 @@
+@using BG.Client.Utils
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div id="@_scrollId" class="excel-grid-scroll">
+    <div class="excel-grid-content" style="width: @(GridUtils.TotalGridWidth)px; height: @(GridUtils.TotalRows * GridUtils.CellHeight)px;">
+        @if (_visibleStartRow >= 0)
+        {
+            @for (var row = _visibleStartRow; row <= _visibleEndRow; row++)
+            {
+                @for (var col = _visibleStartCol; col <= _visibleEndCol; col++)
+                {
+                    var cell = GetCellInfo(row, col);
+                    var colWidth = GridUtils.GetColumnWidth(col);
+                    var colLeft = GridUtils.GetColumnLeft(col);
+                    <div class="excel-grid-cell-wrapper" style="position: absolute; left: @(colLeft)px; top: @(row * GridUtils.CellHeight)px; width: @(colWidth)px; height: @(GridUtils.CellHeight)px;">
+                        <Cell Value="@cell.Value"
+                               Header="@cell.IsHeader"
+                               Clickable="@cell.IsClickable"
+                               Disabled="@cell.Disabled"
+                               Selected="@(row == SelectedRow && col == SelectedCol)"
+                               CssClass="@GetRowClass(row, col)"
+                               InlineStyle="position: absolute; left: 0; top: 0; width: 100%; height: 100%; box-sizing: border-box;"
+                               OnClick="@(() => OnCellClick(row, col, cell))" />
+                    </div>
+                }
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private string _scrollId = "excel-grid-scroll-" + Guid.NewGuid().ToString("N")[..8];
+    private DotNetObjectReference<Spreadsheet>? _dotNetRef;
+    private double _scrollLeft = 0, _scrollTop = 0, _clientWidth = 400, _clientHeight = 300;
+    private int _visibleStartRow = 0, _visibleEndRow = 20, _visibleStartCol = 0, _visibleEndCol = 25;
+    private const int Buffer = 5;
+
+    [Parameter] public TaskTab Tab { get; set; } = null!;
+    [Parameter] public GameResources Resources { get; set; } = null!;
+    [Parameter] public IReadOnlyDictionary<string, int> OwnedByUpgradeId { get; set; } = null!;
+    [Parameter] public int CurrentRoleOrder { get; set; }
+    [Parameter] public EventCallback OnProcessClick { get; set; }
+    [Parameter] public EventCallback<(string upgradeId, double cost)> OnBuy { get; set; }
+    [Parameter] public int SelectedRow { get; set; }
+    [Parameter] public int SelectedCol { get; set; }
+    [Parameter] public EventCallback<(int row, int col)> OnSelectionChanged { get; set; }
+    [Parameter] public string TotalRowDisplay { get; set; } = "";
+
+    private static readonly string[] ColLabels = { "", "Upgrade Name", "Description", "Effect", "Owned", "Cost", "Action" };
+
+    private static string GetRateLabel(string perSecondKey) =>
+        perSecondKey
+            .Replace("PerSecond", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("Processed", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("Done", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("Attended", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("Built", "", StringComparison.OrdinalIgnoreCase)
+            .ToLowerInvariant();
+    private IReadOnlyList<Upgrade> AllUpgrades => Tab.Upgrades;
+    private int TotalRowIndex => 2 + AllUpgrades.Count;
+    private bool IsUpgradeLocked(Upgrade u) => u.UnlockAtRoleOrder > CurrentRoleOrder;
+
+    private (string Value, bool IsHeader, bool IsClickable, bool Disabled, bool IsProcessClick, bool IsBuy, string? UpgradeId, double Cost) GetCellInfo(int row, int col)
+    {
+        if (row == 0 && col == 0)
+            return ("", true, false, false, false, false, null, 0);
+        if (row == 0)
+            return (GridUtils.ColumnIndexToLetter(col - 1), true, false, false, false, false, null, 0);
+        if (col == 0)
+            return (row.ToString(), true, false, false, false, false, null, 0);
+
+        if (row == 1 && col >= 1 && col < ColLabels.Length)
+            return (ColLabels[col], true, false, false, false, false, null, 0);
+
+        if (row == TotalRowIndex && col >= 1 && col <= 7)
+        {
+            return col switch
+            {
+                1 => ("Total", true, false, false, false, false, null, 0),
+                2 => (TotalRowDisplay, true, false, false, false, false, null, 0),
+                _ => ("", true, false, false, false, false, null, 0)
+            };
+        }
+
+        var dataRow = row - 2;
+        if (dataRow >= 0 && dataRow < AllUpgrades.Count && col >= 1 && col <= 7)
+        {
+            var upgrade = AllUpgrades[dataRow];
+            var locked = IsUpgradeLocked(upgrade);
+            var owned = OwnedByUpgradeId.GetValueOrDefault(upgrade.Id, 0);
+            var cost = GameStateService.NextCost(upgrade.BaseCost, upgrade.CostMultiplier, owned);
+            var currency = Resources.Get(Tab.ResourceKey);
+            var canAfford = currency >= cost && !locked;
+            var rateLabel = GetRateLabel(Tab.PerSecondKey);
+            var effectText = $"+{upgrade.EffectPerUnit} {rateLabel}/sec";
+
+            return col switch
+            {
+                1 => (upgrade.Name, false, !locked, locked, !locked, false, null, 0),
+                2 => (upgrade.Description, false, false, locked, false, false, null, 0),
+                3 => (effectText, false, false, locked, false, false, null, 0),
+                4 => (owned.ToString(), false, false, locked, false, false, null, 0),
+                5 => (cost.ToString("N0"), false, false, locked, false, false, null, 0),
+                6 => ("BUY", false, !locked, locked || !canAfford, false, !locked, upgrade.Id, cost),
+                _ => ("", false, false, locked, false, false, null, 0)
+            };
+        }
+
+        return ("", false, false, false, false, false, null, 0);
+    }
+
+    private string GetRowClass(int row, int col)
+    {
+        if (row <= 1 || col == 0) return "";
+        if (row == TotalRowIndex) return "spreadsheet-cell--total-row";
+        var dataRow = row - 2;
+        var locked = dataRow >= 0 && dataRow < AllUpgrades.Count && IsUpgradeLocked(AllUpgrades[dataRow]);
+        var alt = row % 2 == 0 ? "spreadsheet-cell--alt" : "";
+        return locked ? $"spreadsheet-cell--locked {alt}" : alt;
+    }
+
+    private async Task OnCellClick(int row, int col, (string Value, bool IsHeader, bool IsClickable, bool Disabled, bool IsProcessClick, bool IsBuy, string? UpgradeId, double Cost) cell)
+    {
+        await OnSelectionChanged.InvokeAsync((row, col));
+        if (cell.IsProcessClick && OnProcessClick.HasDelegate)
+            await OnProcessClick.InvokeAsync();
+        else if (cell.IsBuy && cell.UpgradeId != null && !cell.Disabled)
+            await OnBuy.InvokeAsync((cell.UpgradeId, cell.Cost));
+    }
+
+    [JSInvokable]
+    public void OnScrollOrResize(double scrollLeft, double scrollTop, double clientWidth, double clientHeight)
+    {
+        _scrollLeft = scrollLeft;
+        _scrollTop = scrollTop;
+        _clientWidth = Math.Max(100, clientWidth);
+        _clientHeight = Math.Max(100, clientHeight);
+
+        _visibleStartCol = Math.Max(0, GridUtils.GetColumnAtScroll(scrollLeft) - Buffer);
+        _visibleEndCol = Math.Min(GridUtils.TotalColumns - 1, GridUtils.GetLastVisibleColumn(scrollLeft, _clientWidth) + Buffer);
+        _visibleStartRow = Math.Max(0, (int)Math.Floor(scrollTop / GridUtils.CellHeight) - Buffer);
+        _visibleEndRow = Math.Min(GridUtils.TotalRows - 1, _visibleStartRow + (int)Math.Ceiling(_clientHeight / GridUtils.CellHeight) + Buffer);
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("gridScrollInterop.init", _scrollId, _dotNetRef);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef != null)
+        {
+            try { await JS.InvokeVoidAsync("gridScrollInterop.dispose", _scrollId); } catch { }
+            _dotNetRef.Dispose();
+        }
+    }
+}

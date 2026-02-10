@@ -1,0 +1,10 @@
+[
+  { "order": 0, "id": "intern", "name": "Intern", "promoteCostResourceKey": null, "promoteCostAmount": 0 },
+  { "order": 1, "id": "clerk", "name": "Clerk", "promoteCostResourceKey": "emailsProcessed", "promoteCostAmount": 500 },
+  { "order": 2, "id": "coordinator", "name": "Coordinator", "promoteCostResourceKey": "reportsDone", "promoteCostAmount": 100 },
+  { "order": 3, "id": "analyst", "name": "Analyst", "promoteCostResourceKey": "reportsDone", "promoteCostAmount": 500 },
+  { "order": 4, "id": "manager", "name": "Manager", "promoteCostResourceKey": "meetingsAttended", "promoteCostAmount": 50 },
+  { "order": 5, "id": "director", "name": "Director", "promoteCostResourceKey": "presentationsDone", "promoteCostAmount": 100 },
+  { "order": 6, "id": "vp", "name": "VP", "promoteCostResourceKey": "spreadsheetsBuilt", "promoteCostAmount": 50 },
+  { "order": 7, "id": "ceo", "name": "CEO", "promoteCostResourceKey": "spreadsheetsBuilt", "promoteCostAmount": 500 }
+]

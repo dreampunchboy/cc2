@@ -1,0 +1,115 @@
+@page "/"
+@rendermode InteractiveServer
+@inject GameStateService GameState
+@inject IGameDataService GameData
+@implements IDisposable
+
+<PageTitle>Spreadsheet Clicker</PageTitle>
+
+<ExcelShell SelectedCellRef="@SelectedCellRef"
+            FormulaBarValue="@FormulaBarValue"
+            AllSheetsPerSecondDisplay="@AllSheetsPerSecondDisplay"
+            SheetTabsContent="@SheetTabsFragment"
+            StatusBarPromoteContent="@PromoteFragment">
+    <Spreadsheet Tab="@ActiveTab"
+                Resources="@GameState.Resources"
+                OwnedByUpgradeId="@GameState.OwnedByUpgradeId"
+                CurrentRoleOrder="@GameState.CurrentRoleOrder"
+                TotalRowDisplay="@ResourceDisplay"
+                SelectedRow="@_selectedRow"
+                SelectedCol="@_selectedCol"
+                OnProcessClick="@HandleProcessClick"
+                OnSelectionChanged="@OnSelectionChanged"
+                OnBuy="@HandleBuy" />
+</ExcelShell>
+
+@code {
+    private int _selectedRow = 1;
+    private int _selectedCol = 1;
+    private Action? _onChangeHandler;
+
+    private IReadOnlyList<TaskTab> VisibleTabs => GameState.GetVisibleTabs();
+    private TaskTab ActiveTab => VisibleTabs.FirstOrDefault(t => t.Id == GameState.ActiveTabId) ?? VisibleTabs.FirstOrDefault() ?? GameData.TaskTabs.FirstOrDefault()!;
+    private double ResourceValue => ResourceValueForTab(ActiveTab.ResourceKey);
+    private double PerSecondValue => PerSecondValueForTab(ActiveTab.PerSecondKey);
+
+    private double ResourceValueForTab(string key) => GameState.Resources.Get(key);
+    private double PerSecondValueForTab(string key) => GameState.PerSecond.Get(key);
+
+    private string ResourceDisplay => $"{ActiveTab.Name}: {Math.Floor(ResourceValue):N0} (+{PerSecondValue:F1}/sec)";
+    private string AllSheetsPerSecondDisplay => string.Join("  |  ", VisibleTabs.Select(tab =>
+        $"{tab.Name}: +{PerSecondValueForTab(tab.PerSecondKey):F1}/sec"));
+    private string SelectedCellRef => GridUtils.GetCellRef(_selectedRow, _selectedCol);
+    private string FormulaBarValue => "";
+
+    private RenderFragment SheetTabsFragment => __builder =>
+    {
+        <TabBar Tabs="VisibleTabs"
+                ActiveTabId="@GameState.ActiveTabId"
+                OnTabChange="@OnTabChange"
+                UseSheetNames="false" />
+    };
+
+    private RenderFragment PromoteFragment => __builder =>
+    {
+        var currentLevel = GameData.GetLevel(GameState.CurrentRoleOrder);
+        var canPromote = GameState.CanPromote(out var nextLevel, out var cost, out _);
+        <span class="excel-status-bar__role">
+            @(currentLevel?.Name ?? "Intern")
+            @if (nextLevel != null)
+            {
+                <button type="button"
+                        class="excel-status-bar__promote-btn"
+                        disabled="@(!canPromote)"
+                        @onclick="HandlePromote">
+                    Promote to @nextLevel.Name (@(cost.ToString("N0")))
+                </button>
+            }
+        </span>
+    };
+
+    private void HandlePromote()
+    {
+        if (GameState.Promote())
+            StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        GameState.ComputePerSecond();
+        _onChangeHandler = () => _ = InvokeAsync(StateHasChanged);
+        GameState.OnChange += _onChangeHandler;
+        var visible = GameState.GetVisibleTabs();
+        if (visible.Count > 0 && visible.All(t => t.Id != GameState.ActiveTabId))
+            GameState.ActiveTabId = visible[0].Id;
+    }
+
+    private void OnTabChange(string tabId)
+    {
+        GameState.ActiveTabId = tabId;
+        StateHasChanged();
+    }
+
+    private void OnSelectionChanged((int row, int col) selection)
+    {
+        _selectedRow = selection.row;
+        _selectedCol = selection.col;
+        StateHasChanged();
+    }
+
+    private void HandleProcessClick()
+    {
+        GameState.ProcessClick(ActiveTab.ResourceKey);
+    }
+
+    private void HandleBuy((string upgradeId, double cost) args)
+    {
+        GameState.Buy(args.upgradeId, args.cost);
+    }
+
+    public void Dispose()
+    {
+        if (_onChangeHandler != null)
+            GameState.OnChange -= _onChangeHandler;
+    }
+}

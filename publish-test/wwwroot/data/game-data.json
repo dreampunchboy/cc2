@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "careerLevels": [
+    { "order": 0, "id": "intern", "name": "Intern", "promoteCostResourceKey": null, "promoteCostAmount": 0 },
+    { "order": 1, "id": "clerk", "name": "Clerk", "promoteCostResourceKey": "emailsProcessed", "promoteCostAmount": 500 },
+    { "order": 2, "id": "coordinator", "name": "Coordinator", "promoteCostResourceKey": "reportsDone", "promoteCostAmount": 100 },
+    { "order": 3, "id": "analyst", "name": "Analyst", "promoteCostResourceKey": "reportsDone", "promoteCostAmount": 500 },
+    { "order": 4, "id": "manager", "name": "Manager", "promoteCostResourceKey": "reportsDone", "promoteCostAmount": 2000 },
+    { "order": 5, "id": "director", "name": "Director", "promoteCostResourceKey": "reportsDone", "promoteCostAmount": 5000 },
+    { "order": 6, "id": "vp", "name": "VP", "promoteCostResourceKey": "reportsDone", "promoteCostAmount": 10000 },
+    { "order": 7, "id": "ceo", "name": "CEO", "promoteCostResourceKey": "reportsDone", "promoteCostAmount": 20000 }
+  ],
+  "taskTabs": [
+    {
+      "id": "emails",
+      "name": "📧 Emails",
+      "resourceKey": "emailsProcessed",
+      "perSecondKey": "emailsPerSecond",
+      "unlockAtRoleOrder": 0,
+      "upgrades": [
+        { "id": "junior-assistant", "name": "Junior Assistant", "description": "Processes emails faster", "baseCost": 15, "costMultiplier": 1.15, "effectPerUnit": 0.1, "unlockAtRoleOrder": 0 },
+        { "id": "inbox-rules", "name": "Inbox Rules", "description": "Auto-sort and flag", "baseCost": 50, "costMultiplier": 1.2, "effectPerUnit": 0.3, "unlockAtRoleOrder": 0 },
+        { "id": "outlook-macros", "name": "Outlook Macros", "description": "Batch actions", "baseCost": 200, "costMultiplier": 1.2, "effectPerUnit": 1.0, "unlockAtRoleOrder": 0 },
+        { "id": "ai-auto-reply", "name": "AI Auto-Reply", "description": "AI drafts replies", "baseCost": 800, "costMultiplier": 1.25, "effectPerUnit": 5.0, "unlockAtRoleOrder": 1 },
+        { "id": "offshore-team", "name": "Offshore Team", "description": "24/7 email handling", "baseCost": 4000, "costMultiplier": 1.3, "effectPerUnit": 25, "unlockAtRoleOrder": 1 }
+      ]
+    },
+    {
+      "id": "reports",
+      "name": "📊 Reports",
+      "resourceKey": "reportsDone",
+      "perSecondKey": "reportsPerSecond",
+      "unlockAtRoleOrder": 1,
+      "upgrades": [
+        { "id": "template-library", "name": "Template Library", "description": "Reuse headers and sections", "baseCost": 100, "costMultiplier": 1.12, "effectPerUnit": 0.3, "unlockAtRoleOrder": 1 },
+        { "id": "pivot-tables", "name": "Pivot Tables", "description": "Turn data into tables faster", "baseCost": 250, "costMultiplier": 1.15, "effectPerUnit": 0.8, "unlockAtRoleOrder": 1 },
+        { "id": "bi-dashboard", "name": "BI Dashboard", "description": "One-click refresh, charts", "baseCost": 800, "costMultiplier": 1.2, "effectPerUnit": 2.5, "unlockAtRoleOrder": 2 },
+        { "id": "data-warehouse-link", "name": "Data Warehouse Link", "description": "Automated data pulls", "baseCost": 2500, "costMultiplier": 1.22, "effectPerUnit": 8, "unlockAtRoleOrder": 2 },
+        { "id": "analytics-team", "name": "Analytics Team", "description": "24/7 reporting", "baseCost": 8000, "costMultiplier": 1.25, "effectPerUnit": 30, "unlockAtRoleOrder": 2 }
+      ]
+    }
+  ],
+  "gameConfig": {
+    "startingResources": {
+      "emailsProcessed": 20,
+      "reportsDone": 0
+    }
+  }
+}
