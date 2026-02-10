@@ -1,7 +1,22 @@
 /* ===================================================
-   CC2 — Browser Game Styles
-   Full-screen canvas, no scrollbars, dark background
+   Office Clicker — Excel-like dark theme
    =================================================== */
+
+:root {
+    --excel-bg: #1e1e1e;
+    --excel-surface: #2d2d2d;
+    --excel-ribbon: #252526;
+    --excel-ribbon-hover: #3c3c3c;
+    --excel-border: #3c3c3c;
+    --excel-text: #e2e2e2;
+    --excel-text-muted: #888;
+    --excel-cell-bg: #ffffff;
+    --excel-selected: #0e639c;
+    --excel-accent: #107c10;
+    --excel-good: #107c10;
+    --excel-bad: #d13438;
+    --excel-neutral: #ffb900;
+}
 
 * {
     margin: 0;
@@ -9,19 +24,379 @@
     box-sizing: border-box;
 }
 
-html, body {
-    width: 100%;
+html, body.excel-theme {
     height: 100%;
     overflow: hidden;
-    background-color: #1a1a2e;
+    background: var(--excel-bg);
+    color: var(--excel-text);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 11px;
 }
 
-#game-container {
+/* --- Title bar --- */
+.title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    padding: 0 12px;
+    background: var(--excel-surface);
+    border-bottom: 1px solid var(--excel-border);
+}
+
+.title-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.autosave {
+    color: var(--excel-text-muted);
+    font-size: 12px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--excel-text);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.title-center {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 16px;
+}
+
+.search-bar {
     width: 100%;
-    height: 100%;
+    padding: 6px 12px;
+    background: var(--excel-bg);
+    border: 1px solid var(--excel-border);
+    border-radius: 4px;
+    color: var(--excel-text);
+    font-size: 12px;
 }
 
-#game-container canvas {
-    display: block;
+.title-right {
+    display: flex;
+    gap: 8px;
+}
+
+.header-btn {
+    background: none;
+    border: none;
+    color: var(--excel-text);
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* --- Ribbon --- */
+.ribbon {
+    background: var(--excel-ribbon);
+    border-bottom: 1px solid var(--excel-border);
+}
+
+.ribbon-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 0 8px;
+}
+
+.ribbon-tab {
+    background: none;
+    border: none;
+    color: var(--excel-text);
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.ribbon-tab:hover {
+    background: var(--excel-ribbon-hover);
+}
+
+.ribbon-tab.active {
+    background: var(--excel-surface);
+    border-bottom: 2px solid var(--excel-surface);
+    margin-bottom: -1px;
+}
+
+.ribbon-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+    padding: 8px 16px 12px;
+    min-height: 56px;
+}
+
+.ribbon-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ribbon-group-label {
+    font-size: 10px;
+    color: var(--excel-text-muted);
+}
+
+.ribbon-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ribbon-btn {
+    background: var(--excel-surface);
+    border: 1px solid var(--excel-border);
+    color: var(--excel-text);
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.ribbon-btn:hover {
+    background: var(--excel-ribbon-hover);
+}
+
+.ribbon-btn.primary {
+    background: var(--excel-accent);
+    border-color: var(--excel-accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+.ribbon-btn.primary:hover {
+    filter: brightness(1.1);
+}
+
+.ribbon-select {
+    background: var(--excel-surface);
+    border: 1px solid var(--excel-border);
+    color: var(--excel-text);
+    padding: 4px 8px;
+    font-size: 11px;
+    min-width: 100px;
+}
+
+.ribbon-size {
+    padding: 4px 6px;
+    color: var(--excel-text);
+}
+
+.styles {
+    gap: 2px;
+}
+
+.style-btn {
+    padding: 4px 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 10px;
+}
+
+.style-btn.bad {
+    background: var(--excel-bad);
+    color: #fff;
+}
+
+.style-btn.good {
+    background: var(--excel-good);
+    color: #fff;
+}
+
+.style-btn.neutral {
+    background: var(--excel-neutral);
+    color: #000;
+}
+
+.style-btn.calculation {
+    background: #5c2d91;
+    color: #fff;
+}
+
+/* --- Formula bar --- */
+.formula-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 8px;
+    background: var(--excel-surface);
+    border-bottom: 1px solid var(--excel-border);
+}
+
+.cell-ref {
+    min-width: 48px;
+    color: var(--excel-text-muted);
+    font-size: 11px;
+}
+
+.fx-icon {
+    color: var(--excel-text-muted);
+    font-size: 14px;
+    font-style: italic;
+}
+
+.formula-input {
+    flex: 1;
+    background: var(--excel-bg);
+    border: none;
+    color: var(--excel-text);
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.formula-input:focus {
+    outline: none;
+}
+
+/* --- Grid --- */
+.grid-wrapper {
+    flex: 1;
+    overflow: auto;
+    padding: 8px;
+}
+
+.sheet-grid {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 800px;
+    background: var(--excel-cell-bg);
+    color: #000;
+}
+
+.sheet-grid th,
+.sheet-grid td {
+    border: 1px solid #d4d4d4;
+    padding: 4px 8px;
+    text-align: left;
+    font-size: 11px;
+}
+
+.sheet-grid thead th {
+    background: #f3f3f3;
+    color: #000;
+    font-weight: 600;
+    min-width: 32px;
+}
+
+.sheet-grid .corner-cell {
+    background: #eaeaea;
+    min-width: 32px;
+}
+
+.sheet-grid tbody tr:nth-child(even) {
+    background: #fafafa;
+}
+
+.sheet-grid tbody tr:hover {
+    background: #f0f7ff;
+}
+
+.sheet-grid .row-num {
+    background: #f3f3f3;
+    font-weight: 600;
+    color: #666;
+    text-align: right;
+    min-width: 32px;
+}
+
+.sheet-grid .cell-buy {
+    text-align: center;
+}
+
+.sheet-grid .btn-buy {
+    background: var(--excel-accent);
+    color: #fff;
+    border: none;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-size: 11px;
+    border-radius: 2px;
+}
+
+.sheet-grid .btn-buy:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.sheet-grid .btn-buy:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.sheet-grid .cell-purchased {
+    color: var(--excel-good);
+    font-style: italic;
+}
+
+body.excel-theme {
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Sheet tabs --- */
+.sheet-tabs {
+    display: flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 8px;
+    background: var(--excel-surface);
+    border-top: 1px solid var(--excel-border);
+}
+
+.sheet-tab-list {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+}
+
+.sheet-tab {
+    background: var(--excel-surface);
+    border: 1px solid var(--excel-border);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    padding: 4px 14px;
+    color: var(--excel-text);
+    cursor: pointer;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.sheet-tab:hover {
+    background: var(--excel-ribbon-hover);
+}
+
+.sheet-tab.active {
+    background: var(--excel-bg);
+    margin-bottom: -1px;
+    padding-bottom: 5px;
+}
+
+.sheet-tab-btn {
+    background: none;
+    border: none;
+    color: var(--excel-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 10px;
+}
+
+.sheet-tab-add {
+    background: none;
+    border: none;
+    color: var(--excel-text);
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 14px;
+    margin-left: 4px;
+}
+
+.sheet-info-row td {
+    background: #e8f4fc;
+    font-weight: 600;
 }

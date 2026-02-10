@@ -1,140 +1,132 @@
 // ============================================================
-//  CC2 — Phaser 3 Game
-//  A minimal prototype with Boot and Main scenes that
-//  demonstrates the Steam bridge integration.
+//  Office Clicker — DOM render, poll state, wire actions
 // ============================================================
 
-// ---- Boot Scene ----
-class BootScene extends Phaser.Scene {
-    constructor() {
-        super({ key: 'BootScene' });
+(function () {
+    const formulaInput = document.getElementById('formula-input');
+    const cellRef = document.querySelector('.cell-ref');
+    const gridBody = document.getElementById('grid-body');
+    const sheetTabsEl = document.getElementById('sheet-tabs');
+    const btnWork = document.getElementById('btn-work');
+
+    let state = null;
+    let currentSheetId = 1;
+    let pollInterval = null;
+
+    function poll() {
+        GameAPI.getState()
+            .then((s) => {
+                state = s;
+                render();
+            })
+            .catch(() => {
+                if (!state) {
+                    if (formulaInput) formulaInput.value = 'Connecting...';
+                }
+            });
     }
 
-    preload() {
-        // Show a simple loading bar
-        const { width, height } = this.scale;
-        const barW = width * 0.4;
-        const barH = 24;
-        const barX = (width - barW) / 2;
-        const barY = height / 2;
+    function render() {
+        if (!state) return;
 
-        const bg = this.add.rectangle(barX + barW / 2, barY, barW, barH, 0x222244);
-        const fill = this.add.rectangle(barX + 2, barY, 0, barH - 4, 0x5588ff);
-        fill.setOrigin(0, 0.5);
+        const currency = state.currency ?? 0;
+        const perSecond = state.perSecond ?? 0;
+        const clickPower = state.clickPower ?? 1;
 
-        this.load.on('progress', (v) => {
-            fill.width = (barW - 4) * v;
-        });
+        if (formulaInput) {
+            formulaInput.value = `= ${GameAPI.formatNumber(currency)} Productivity | ${GameAPI.formatNumber(perSecond)}/s`;
+        }
+        if (cellRef) cellRef.textContent = 'Total';
 
-        // Placeholder asset: generate a small colored square texture
-        const gfx = this.make.graphics({ add: false });
-        gfx.fillStyle(0x44aaff, 1);
-        gfx.fillRoundedRect(0, 0, 64, 64, 10);
-        gfx.generateTexture('player', 64, 64);
-        gfx.destroy();
-    }
+        const sheets = state.sheets ?? [];
+        const upgrades = state.upgrades ?? [];
+        const sheet = sheets.find((s) => s.id === currentSheetId);
+        const sheetUpgrades = upgrades.filter((u) => u.sheetId === currentSheetId);
 
-    create() {
-        this.scene.start('MainScene');
-    }
-}
+        if (gridBody) {
+            gridBody.innerHTML = '';
 
-// ---- Main Scene ----
-class MainScene extends Phaser.Scene {
-    constructor() {
-        super({ key: 'MainScene' });
-        this.playerName = 'Loading...';
-        this.steamConnected = false;
-    }
+            if (sheet) {
+                const infoRow = document.createElement('tr');
+                infoRow.className = 'sheet-info-row';
+                const canBuySheet = sheet.nextCost > 0 && currency >= sheet.nextCost;
+                infoRow.innerHTML = `
+          <td class="row-num">—</td>
+          <td colspan="2">Sheet: ${sheet.name} — Owned: ${sheet.owned} | Rate: ${GameAPI.formatNumber((sheet.baseRate || 0) * sheet.owned)}/s</td>
+          <td class="cell-buy">${sheet.nextCost > 0 ? `<button type="button" class="btn-buy btn-buy-sheet" data-sheet-id="${sheet.id}" ${canBuySheet ? '' : 'disabled'}>Buy (${GameAPI.formatNumber(sheet.nextCost)})</button>` : '—'}</td>
+        `;
+                gridBody.appendChild(infoRow);
+            }
 
-    async create() {
-        const { width, height } = this.scale;
-
-        // --- Background gradient (simulated with overlapping rectangles) ---
-        this.add.rectangle(width / 2, height / 2, width, height, 0x1a1a2e);
-        this.add.rectangle(width / 2, height * 0.7, width, height * 0.6, 0x16213e);
-
-        // --- Fetch Steam user info ---
-        try {
-            const user = await SteamBridge.getUser();
-            this.playerName = user.name;
-            this.steamConnected = user.isOnline;
-        } catch {
-            this.playerName = 'Offline Player';
+            sheetUpgrades.forEach((u, idx) => {
+                const tr = document.createElement('tr');
+                const canBuy = !u.purchased && currency >= u.cost;
+                tr.innerHTML = `
+          <td class="row-num">${idx + 1}</td>
+          <td>${u.name}</td>
+          <td>${GameAPI.formatNumber(u.cost)}</td>
+          <td class="cell-buy ${u.purchased ? 'cell-purchased' : ''}">
+            ${u.purchased ? 'Purchased' : `<button type="button" class="btn-buy" data-upgrade-id="${u.id}" ${canBuy ? '' : 'disabled'}>Buy</button>`}
+          </td>
+        `;
+                gridBody.appendChild(tr);
+            });
         }
 
-        // --- Title ---
-        this.add.text(width / 2, height * 0.15, 'CC2', {
-            fontSize: '72px',
-            fontFamily: 'Segoe UI, Arial, sans-serif',
-            fontStyle: 'bold',
-            color: '#e2e2e2',
-            stroke: '#0f3460',
-            strokeThickness: 6,
-        }).setOrigin(0.5);
-
-        // --- Player greeting ---
-        const greeting = this.steamConnected
-            ? `Welcome, ${this.playerName}!`
-            : `Welcome, ${this.playerName}! (offline mode)`;
-
-        this.add.text(width / 2, height * 0.28, greeting, {
-            fontSize: '28px',
-            fontFamily: 'Segoe UI, Arial, sans-serif',
-            color: '#a8d8ea',
-        }).setOrigin(0.5);
-
-        // --- Movable player sprite ---
-        this.player = this.add.sprite(width / 2, height / 2, 'player');
-        this.player.setInteractive({ draggable: true });
-
-        // Drag to move
-        this.input.setDraggable(this.player);
-        this.input.on('drag', (_pointer, obj, dragX, dragY) => {
-            obj.x = dragX;
-            obj.y = dragY;
-        });
-
-        // --- Instruction text ---
-        this.add.text(width / 2, height * 0.88, 'Drag the square around  |  This is your Steam browser game prototype', {
-            fontSize: '16px',
-            fontFamily: 'Segoe UI, Arial, sans-serif',
-            color: '#555577',
-        }).setOrigin(0.5);
-
-        // --- Connection status indicator ---
-        const statusColor = this.steamConnected ? 0x44ff88 : 0xff8844;
-        const statusLabel = this.steamConnected ? 'Steam: Connected' : 'Steam: Offline';
-        this.add.circle(30, 30, 8, statusColor);
-        this.add.text(46, 22, statusLabel, {
-            fontSize: '14px',
-            fontFamily: 'Segoe UI, Arial, sans-serif',
-            color: '#888899',
-        });
-
-        // --- Start heartbeat ---
-        SteamBridge.startHeartbeat(10000);
-
-        // --- Handle window resize ---
-        this.scale.on('resize', (gameSize) => {
-            this.cameras.main.setSize(gameSize.width, gameSize.height);
-        });
+        if (sheetTabsEl) {
+            sheetTabsEl.innerHTML = '';
+            (state.sheets ?? []).forEach((s) => {
+                const tab = document.createElement('button');
+                tab.type = 'button';
+                tab.className = 'sheet-tab' + (s.id === currentSheetId ? ' active' : '');
+                tab.textContent = s.name;
+                tab.dataset.sheetId = s.id;
+                tab.addEventListener('click', () => {
+                    currentSheetId = s.id;
+                    render();
+                    document.querySelectorAll('.sheet-tab').forEach((t) => t.classList.remove('active'));
+                    tab.classList.add('active');
+                });
+                sheetTabsEl.appendChild(tab);
+            });
+        }
     }
-}
 
-// ---- Phaser Config ----
-const config = {
-    type: Phaser.AUTO,
-    parent: 'game-container',
-    backgroundColor: '#1a1a2e',
-    scale: {
-        mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: '100%',
-        height: '100%',
-    },
-    scene: [BootScene, MainScene],
-};
+    function init() {
+        btnWork?.addEventListener('click', async () => {
+            try {
+                await GameAPI.click();
+            } catch (e) {
+                console.warn(e);
+            }
+        });
 
-// Launch!
-const game = new Phaser.Game(config);
+        gridBody?.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.btn-buy');
+            if (!btn || btn.disabled) return;
+
+            const upgradeId = btn.dataset.upgradeId;
+            const sheetId = btn.dataset.sheetId;
+
+            try {
+                if (upgradeId) {
+                    await GameAPI.buyUpgrade(parseInt(upgradeId, 10));
+                } else if (sheetId) {
+                    await GameAPI.buySheet(parseInt(sheetId, 10), 1);
+                }
+                poll();
+            } catch (err) {
+                console.warn(err);
+            }
+        });
+
+        poll();
+        pollInterval = setInterval(poll, 150);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

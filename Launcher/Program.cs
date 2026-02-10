@@ -56,15 +56,23 @@ AppDomain.CurrentDomain.ProcessExit += (_, _) =>
     shutdownCts.Cancel();
 };
 
-// --- Main loop: pump Steam callbacks at ~15 Hz ---
+// --- Main loop: pump Steam callbacks at ~15 Hz, periodic game save ---
 const int callbackIntervalMs = 66; // ~15 Hz
 const int heartbeatTimeoutSeconds = 120; // auto-close if browser gone for 2 min
+var lastSave = DateTime.UtcNow;
 
 try
 {
     while (!shutdownCts.Token.IsCancellationRequested)
     {
         steam.RunCallbacks();
+
+        // Periodic game save every 30 seconds
+        if ((DateTime.UtcNow - lastSave).TotalSeconds > 30)
+        {
+            server.SaveGame();
+            lastSave = DateTime.UtcNow;
+        }
 
         // Optional: auto-shutdown if browser stops calling the API
         var elapsed = DateTime.UtcNow - server.LastHeartbeat;
