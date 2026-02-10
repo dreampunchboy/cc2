@@ -7,4 +7,11 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <!-- When used as a referenced project (e.g. by Server), avoid duplicate appsettings in publish -->
+  <ItemGroup>
+    <Content Update="appsettings.json;appsettings.Development.json">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,22 @@
+<div class="tab-bar">
+    @{
+        var index = 0;
+        foreach (var tab in Tabs)
+        {
+            var i = index++;
+            var label = UseSheetNames ? $"Sheet{i + 1}" : tab.Name;
+            <button type="button"
+                    class="tab-bar__tab @(tab.Id == ActiveTabId ? "tab-bar__tab--active" : "")"
+                    @onclick="() => OnTabChange.InvokeAsync(tab.Id)">
+                @label
+            </button>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<TaskTab> Tabs { get; set; } = Array.Empty<TaskTab>();
+    [Parameter] public string ActiveTabId { get; set; } = "";
+    [Parameter] public EventCallback<string> OnTabChange { get; set; }
+    [Parameter] public bool UseSheetNames { get; set; }
+}

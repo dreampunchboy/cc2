@@ -2,6 +2,10 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.Extensions.Hosting;
+using BG.Client.Components;
+using BG.Client.Services;
+
+namespace BG.Server;
 
 public class Program
 {
@@ -10,27 +14,29 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddRazorComponents()
+            .AddInteractiveServerComponents();
+        builder.Services.AddScoped<GameStateService>();
         builder.Services.AddControllersWithViews();
         builder.Services.AddRazorPages();
 
         var app = builder.Build();
 
-        if (app.Environment.IsDevelopment())
+        if (!app.Environment.IsDevelopment())
         {
-            app.UseWebAssemblyDebugging();
+            app.UseExceptionHandler("/Error", createScopeForErrors: true);
         }
-        else
-        {
-            app.UseExceptionHandler("/Error");
-        }
+        app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
-        app.UseBlazorFrameworkFiles();
+        app.MapStaticAssets();
         app.UseStaticFiles();
         app.UseRouting();
+        app.UseAntiforgery();
 
+        app.MapRazorComponents<App>()
+            .AddInteractiveServerRenderMode();
         app.MapRazorPages();
         app.MapControllers();
-        app.MapFallbackToFile("index.html");
 
         var appUrl = builder.Configuration["urls"]?.Split(';').FirstOrDefault()?.Trim() ?? "http://localhost:5079";
 
