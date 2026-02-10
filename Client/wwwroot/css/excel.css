@@ -233,12 +233,123 @@
   border: 1px solid var(--excel-border);
 }
 
+.excel-grid-with-sidebar {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+}
+
 .excel-grid-area {
   flex: 1;
   min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Excel-style sidebar (Queries & Connections style) */
+.excel-sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: var(--excel-bg);
+  border-left: 1px solid var(--excel-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.excel-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--excel-border);
+  min-height: 36px;
+}
+
+.excel-sidebar__title {
+  font-size: 12px;
+  color: var(--excel-text);
+  font-weight: 600;
+}
+
+.excel-sidebar__close {
+  background: none;
+  border: none;
+  color: var(--excel-text-dim);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.excel-sidebar__close:hover {
+  color: var(--excel-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.excel-sidebar__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.excel-sidebar-form__field {
+  margin-bottom: 12px;
+}
+
+.excel-sidebar-form__label {
+  display: block;
+  font-size: 11px;
+  color: var(--excel-text-dim);
+  margin-bottom: 4px;
+}
+
+.excel-sidebar-form__input {
+  padding: 6px 8px;
+  font-size: 12px;
+  color: var(--excel-text);
+  background: var(--excel-bg-2);
+  border: 1px solid var(--excel-border);
+  min-height: 28px;
+}
+
+.excel-sidebar-form__input--clickable {
+  cursor: pointer;
+  color: var(--excel-text-dim);
+}
+
+.excel-sidebar-form__input--clickable:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--excel-text);
+}
+
+.excel-sidebar-form__input--multiline {
+  min-height: 60px;
+}
+
+.excel-sidebar-form__actions {
+  margin-top: 16px;
+}
+
+.excel-sidebar-form__send {
+  padding: 6px 16px;
+  font-size: 12px;
+  background: #107c10;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.excel-sidebar-form__send:hover:not(:disabled) {
+  background: #128c12;
+}
+
+.excel-sidebar-form__send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .excel-sheet-bar {

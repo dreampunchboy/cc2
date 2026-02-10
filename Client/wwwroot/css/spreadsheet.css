@@ -8,6 +8,23 @@
   min-width: 0;
   min-height: 0;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.spreadsheet-cell__progress-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(33, 115, 70, 0.25);
+  min-width: 0;
+  transition: width 0.15s ease-out;
+}
+
+.spreadsheet-cell__content {
+  position: relative;
+  z-index: 1;
 }
 
 .spreadsheet-cell--header {

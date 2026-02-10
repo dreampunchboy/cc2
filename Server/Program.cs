@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using BG.Client.Components;
 using BG.Client.Services;
+using BG.Server.Controllers;
 
 namespace BG.Server;
 
@@ -138,6 +139,13 @@ public class Program
         trayIcon.ContextMenuStrip.Items.Add(exitItem);
 
         trayIcon.DoubleClick += (_, _) => openItem.PerformClick();
+
+        AppShutdown.OnShutdown = () =>
+        {
+            trayIcon.Visible = false;
+            app.Services.GetRequiredService<IHostApplicationLifetime>().StopApplication();
+            Application.Exit();
+        };
 
         // Run web host in background; tray message loop on main thread
         _ = Task.Run(() => app.Run());

@@ -5,13 +5,20 @@ namespace BG.Client.Services;
 
 public class GameStateService : IDisposable
 {
+    public const string ProductivityKey = "productivity";
+    public const string ProductivityPerSecondKey = "productivityPerSecond";
+
     private readonly IGameDataService _gameData;
     private readonly System.Timers.Timer _timer;
     private PerSecond _perSecondCache = new();
 
     public GameResources Resources { get; }
     public Dictionary<string, int> OwnedByUpgradeId { get; } = new();
-    public string ActiveTabId { get; set; } = "emails";
+    /// <summary>Per-upgrade generation progress (0-1) for the tick timer display. Only nonzero when owned > 0.</summary>
+    public IReadOnlyDictionary<string, double> UpgradeGenerationProgress => _upgradeGenerationProgress;
+    private readonly Dictionary<string, double> _upgradeGenerationProgress = new();
+
+    public string ActiveTabId { get; set; } = "inbox";
 
     /// <summary>Current career tier (0 = Intern, 7 = CEO). Gates which tabs and upgrades are visible.</summary>
     public int CurrentRoleOrder { get; set; }
@@ -23,12 +30,8 @@ public class GameStateService : IDisposable
         _gameData = gameData;
         Resources = new GameResources();
         var config = _gameData.Config?.StartingResources;
-        var defaultStarts = new Dictionary<string, double> { ["emailsProcessed"] = 20, ["reportsDone"] = 0 };
-        foreach (var tab in _gameData.TaskTabs)
-        {
-            var start = config?.GetValueOrDefault(tab.ResourceKey) ?? defaultStarts.GetValueOrDefault(tab.ResourceKey, 0);
-            Resources.Set(tab.ResourceKey, start);
-        }
+        var start = config?.GetValueOrDefault(ProductivityKey) ?? 20;
+        Resources.Set(ProductivityKey, start);
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += Tick;
         _timer.Start();
@@ -37,16 +40,16 @@ public class GameStateService : IDisposable
     public PerSecond ComputePerSecond()
     {
         var ps = new PerSecond();
+        double totalRate = 0;
         foreach (var tab in _gameData.TaskTabs)
         {
-            double rate = 0;
             foreach (var up in tab.Upgrades)
             {
                 var owned = OwnedByUpgradeId.GetValueOrDefault(up.Id, 0);
-                rate += owned * up.EffectPerUnit;
+                totalRate += owned * up.RatePerSecond;
             }
-            ps.Set(tab.PerSecondKey, rate);
         }
+        ps.Set(ProductivityPerSecondKey, totalRate);
         _perSecondCache = ps;
         return ps;
     }
@@ -56,8 +59,25 @@ public class GameStateService : IDisposable
     private void Tick(object? sender, ElapsedEventArgs e)
     {
         var ps = ComputePerSecond();
+        Resources.Add(ProductivityKey, ps.Get(ProductivityPerSecondKey));
+
+        // Advance generation-cycle progress for each owned upgrade (tick timer for progress bar)
+        var effectTimeFallback = 1.0;
         foreach (var tab in _gameData.TaskTabs)
-            Resources.Add(tab.ResourceKey, ps.Get(tab.PerSecondKey));
+        {
+            foreach (var up in tab.Upgrades)
+            {
+                var owned = OwnedByUpgradeId.GetValueOrDefault(up.Id, 0);
+                if (owned == 0) continue;
+                var cycleTime = up.EffectAmount > 0 && up.EffectTime > 0 ? up.EffectTime : effectTimeFallback;
+                var inc = 1.0 / cycleTime;
+                var current = _upgradeGenerationProgress.GetValueOrDefault(up.Id, 0);
+                current += inc;
+                if (current >= 1.0) current -= 1.0;
+                _upgradeGenerationProgress[up.Id] = current;
+            }
+        }
+
         NotifyChange();
     }
 
@@ -66,10 +86,10 @@ public class GameStateService : IDisposable
         var tab = _gameData.TaskTabs.FirstOrDefault(t => t.Upgrades.Any(u => u.Id == upgradeId));
         if (tab == null) return;
 
-        var current = Resources.Get(tab.ResourceKey);
+        var current = Resources.Get(ProductivityKey);
         if (current < cost) return;
 
-        Resources.Subtract(tab.ResourceKey, cost);
+        Resources.Subtract(ProductivityKey, cost);
         OwnedByUpgradeId[upgradeId] = OwnedByUpgradeId.GetValueOrDefault(upgradeId, 0) + 1;
         NotifyChange();
     }
@@ -77,10 +97,10 @@ public class GameStateService : IDisposable
     public static int NextCost(double baseCost, double costMultiplier, int owned) =>
         (int)Math.Floor(baseCost * Math.Pow(costMultiplier, owned));
 
-    /// <summary>Process one manual click for the given resource (e.g. process one email). Adds 1 to that resource.</summary>
+    /// <summary>Process one manual click – adds 1 Productivity.</summary>
     public void ProcessClick(string resourceKey)
     {
-        Resources.Add(resourceKey, 1);
+        Resources.Add(ProductivityKey, 1);
         NotifyChange();
     }
 

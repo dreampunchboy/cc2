@@ -4,7 +4,11 @@
      tabindex="@(Clickable && !Disabled ? 0 : (int?)null)"
      @onclick="HandleClick"
      @onkeydown="HandleKeyDown">
-    @Value
+    @if (Progress > 0)
+    {
+        <div class="spreadsheet-cell__progress-bg" style="width: @(Progress * 100)%"></div>
+    }
+    <span class="spreadsheet-cell__content">@Value</span>
 </div>
 
 @code {
@@ -17,6 +21,7 @@
     [Parameter] public string CssClass { get; set; } = "";
     [Parameter] public string? InlineStyle { get; set; }
     [Parameter] public bool Selected { get; set; }
+    [Parameter] public double Progress { get; set; }
     [Parameter] public EventCallback OnClick { get; set; }
 
     private async Task HandleClick()

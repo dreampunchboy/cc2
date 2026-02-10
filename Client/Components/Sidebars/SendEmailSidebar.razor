@@ -1,0 +1,103 @@
+@* Send Email workflow: TO, Subject, Body - click to auto-fill, Send to complete *@
+<div class="excel-sidebar-form">
+    <div class="excel-sidebar-form__field">
+        <label class="excel-sidebar-form__label">To</label>
+        <div class="excel-sidebar-form__input excel-sidebar-form__input--clickable"
+             role="button"
+             tabindex="0"
+             @onclick="FillTo"
+             @onkeydown="(e) => HandleKeyDown(e, FillTo)">
+            @(_toField ?? "Click to fill")
+        </div>
+    </div>
+    <div class="excel-sidebar-form__field">
+        <label class="excel-sidebar-form__label">Subject</label>
+        <div class="excel-sidebar-form__input excel-sidebar-form__input--clickable"
+             role="button"
+             tabindex="0"
+             @onclick="FillSubject"
+             @onkeydown="(e) => HandleKeyDown(e, FillSubject)">
+            @(_subjectField ?? "Click to fill")
+        </div>
+    </div>
+    <div class="excel-sidebar-form__field">
+        <label class="excel-sidebar-form__label">Body</label>
+        <div class="excel-sidebar-form__input excel-sidebar-form__input--clickable excel-sidebar-form__input--multiline"
+             role="button"
+             tabindex="0"
+             @onclick="FillBody"
+             @onkeydown="(e) => HandleKeyDown(e, FillBody)">
+            @(_bodyField ?? "Click to fill")
+        </div>
+    </div>
+    <div class="excel-sidebar-form__actions">
+        <button type="button"
+                class="excel-sidebar-form__send"
+                disabled="@(!CanSend)"
+                @onclick="HandleSend">Send</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnComplete { get; set; }
+
+    private string? _toField;
+    private string? _subjectField;
+    private string? _bodyField;
+
+    private static readonly string[] FirstNames = { "john", "jane", "mike", "sarah", "david", "emma", "alex", "lisa" };
+    private static readonly string[] LastNames = { "smith", "johnson", "williams", "brown", "jones", "garcia", "miller", "wilson" };
+    private static readonly string[] Domains = { "company.com", "corp.net", "office.org" };
+    private static readonly string[] Subjects = { "RE: Q3 budget", "Follow-up", "Meeting notes", "Action items", "Project update", "Quick question" };
+    private static readonly string[] BodyStarts = { "Hi, please find attached...", "Thanks for your email. Per our discussion...", "Following up on our call...", "Kind regards,", "Please review and let me know..." };
+
+    private bool CanSend => !string.IsNullOrEmpty(_toField) && !string.IsNullOrEmpty(_subjectField) && !string.IsNullOrEmpty(_bodyField);
+
+    private string RandomEmail()
+    {
+        var first = FirstNames[Random.Shared.Next(FirstNames.Length)];
+        var last = LastNames[Random.Shared.Next(LastNames.Length)];
+        var domain = Domains[Random.Shared.Next(Domains.Length)];
+        return $"{first}.{last}@{domain}";
+    }
+
+    private string RandomSubject() => Subjects[Random.Shared.Next(Subjects.Length)];
+
+    private string RandomBody() => BodyStarts[Random.Shared.Next(BodyStarts.Length)];
+
+    private void FillTo()
+    {
+        _toField = RandomEmail();
+        StateHasChanged();
+    }
+
+    private void FillSubject()
+    {
+        _subjectField = RandomSubject();
+        StateHasChanged();
+    }
+
+    private void FillBody()
+    {
+        _bodyField = RandomBody();
+        StateHasChanged();
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e, Action action)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            action();
+        }
+    }
+
+    private async Task HandleSend()
+    {
+        if (!CanSend) return;
+        await OnComplete.InvokeAsync();
+        _toField = null;
+        _subjectField = null;
+        _bodyField = null;
+        StateHasChanged();
+    }
+}

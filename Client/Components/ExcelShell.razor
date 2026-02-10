@@ -8,13 +8,13 @@
             <button type="button" class="excel-title-bar__icon" title="Undo" aria-label="Undo">↶</button>
             <button type="button" class="excel-title-bar__icon" title="Redo" aria-label="Redo">↷</button>
         </div>
-        <div class="excel-title-bar__center">Book1 - Excel</div>
+        <div class="excel-title-bar__center">Book1</div>
         <div class="excel-title-bar__right">
             <div class="excel-title-bar__search">Search</div>
             <button type="button" class="excel-title-bar__share">Share</button>
             <button type="button" class="excel-title-bar__win" aria-label="Minimize">─</button>
             <button type="button" class="excel-title-bar__win" aria-label="Maximize">□</button>
-            <button type="button" class="excel-title-bar__win" aria-label="Close">✕</button>
+            <button type="button" class="excel-title-bar__win" aria-label="Close" @onclick="HandleCloseClick">✕</button>
         </div>
     </header>
 
@@ -103,8 +103,14 @@
         <div class="excel-formula-bar__input">@FormulaBarValue</div>
     </div>
 
-    <div class="excel-grid-area">
-        @ChildContent
+    <div class="excel-grid-with-sidebar">
+        <div class="excel-grid-area">
+            @ChildContent
+        </div>
+        @if (SidebarContent != null)
+        {
+            @SidebarContent
+        }
     </div>
 
     <div class="excel-sheet-bar">
@@ -127,10 +133,18 @@
 </div>
 
 @code {
+    [Inject] private IJSRuntime JSRuntime { get; set; } = null!;
+
     [Parameter] public RenderFragment? SheetTabsContent { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? SidebarContent { get; set; }
     [Parameter] public string SelectedCellRef { get; set; } = "A1";
     [Parameter] public string FormulaBarValue { get; set; } = "";
     [Parameter] public string AllSheetsPerSecondDisplay { get; set; } = "";
     [Parameter] public RenderFragment? StatusBarPromoteContent { get; set; }
+
+    private async Task HandleCloseClick()
+    {
+        await JSRuntime.InvokeVoidAsync("closeApp");
+    }
 }
