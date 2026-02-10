@@ -1,0 +1,16 @@
+<div class="tab-bar">
+    @foreach (var tab in Tabs)
+    {
+        <button type="button"
+                class="tab-bar__tab @(tab.Id == ActiveTabId ? "tab-bar__tab--active" : "")"
+                @onclick="() => OnTabChange.InvokeAsync(tab.Id)">
+            @tab.Name
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<TaskTab> Tabs { get; set; } = Array.Empty<TaskTab>();
+    [Parameter] public string ActiveTabId { get; set; } = "";
+    [Parameter] public EventCallback<string> OnTabChange { get; set; }
+}

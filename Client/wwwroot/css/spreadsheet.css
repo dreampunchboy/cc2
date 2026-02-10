@@ -1,0 +1,102 @@
+/* Excel-style grid: fixed cell size */
+.spreadsheet {
+  --cell-width: 120px;
+  --cell-height: 32px;
+  --header-cols: 6;
+  --header-rows: 1;
+  display: grid;
+  grid-template-columns: var(--cell-width) repeat(var(--header-cols), var(--cell-width));
+  grid-template-rows: var(--cell-height) repeat(auto-fill, var(--cell-height));
+  grid-auto-rows: var(--cell-height);
+  width: max-content;
+  border: 1px solid #2d2d2d;
+  background: #1e1e1e;
+  font-size: 13px;
+}
+
+.spreadsheet-cell {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  border-right: 1px solid #2d2d2d;
+  border-bottom: 1px solid #2d2d2d;
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.spreadsheet-cell--header {
+  background: #252526;
+  color: #cccccc;
+  font-weight: 600;
+}
+
+.spreadsheet-cell--clickable {
+  cursor: pointer;
+  background: #2d5a3a;
+  color: #fff;
+}
+
+.spreadsheet-cell--clickable:hover:not(.spreadsheet-cell--disabled) {
+  background: #3d7a4a;
+}
+
+.spreadsheet-cell--disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #333 !important;
+}
+
+.spreadsheet-cell--alt {
+  background: #252526;
+}
+
+.spreadsheet-cell--corner {
+  background: #252526;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #2d2d2d;
+  background: #252526;
+  padding: 0;
+}
+
+.tab-bar__tab {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: #969696;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tab-bar__tab:hover {
+  color: #fff;
+}
+
+.tab-bar__tab--active {
+  color: #fff;
+  background: #1e1e1e;
+  border-bottom-color: #0e639c;
+}
+
+.spreadsheet-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 16px;
+}
+
+.resource-display {
+  margin-bottom: 12px;
+  font-size: 18px;
+  color: #cccccc;
+}
+
+.resource-display strong {
+  color: #4ec9b0;
+}

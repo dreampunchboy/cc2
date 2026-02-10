@@ -1,0 +1,39 @@
+<div class="spreadsheet" style="grid-template-columns: 40px repeat(6, 120px);">
+    <Cell GridColumn="1" GridRow="1" Value="" Header CssClass="spreadsheet-cell--corner" />
+    @foreach (var label in ColLabels)
+    {
+        var i = Array.IndexOf(ColLabels, label) + 2;
+        <Cell GridColumn="@i.ToString()" GridRow="1" Value="@label" Header />
+    }
+    @{
+        var rowIndex = 2;
+        var currency = Tab.ResourceKey == "emailsProcessed" ? Resources.EmailsProcessed : Resources.ReportsDone;
+    }
+    @foreach (var upgrade in Tab.Upgrades)
+    {
+        var row = rowIndex++;
+        var owned = OwnedByUpgradeId.GetValueOrDefault(upgrade.Id, 0);
+        var cost = GameStateService.NextCost(upgrade.BaseCost, upgrade.CostMultiplier, owned);
+        var canAfford = currency >= cost;
+        var isReports = upgrade.Id.StartsWith("report", StringComparison.OrdinalIgnoreCase) || upgrade.Description.Contains("report", StringComparison.OrdinalIgnoreCase);
+        var effectText = $"+{upgrade.EffectPerUnit} {(isReports ? "reports" : "emails")}/sec";
+        var rowClass = row % 2 == 0 ? "spreadsheet-cell--alt" : "";
+        <Cell GridColumn="1" GridRow="@row.ToString()" Value="@row.ToString()" Header CssClass="@rowClass" />
+        <Cell GridColumn="2" GridRow="@row.ToString()" Value="@upgrade.Name" CssClass="@rowClass" />
+        <Cell GridColumn="3" GridRow="@row.ToString()" Value="@upgrade.Description" CssClass="@rowClass" />
+        <Cell GridColumn="4" GridRow="@row.ToString()" Value="@effectText" CssClass="@rowClass" />
+        <Cell GridColumn="5" GridRow="@row.ToString()" Value="@owned.ToString()" CssClass="@rowClass" />
+        <Cell GridColumn="6" GridRow="@row.ToString()" Value="@cost.ToString()" CssClass="@rowClass" />
+        <Cell GridColumn="7" GridRow="@row.ToString()" Value="BUY" Clickable Disabled="@(!canAfford)" CssClass="@rowClass"
+               OnClick="@(() => OnBuy.InvokeAsync((upgrade.Id, cost)))" />
+    }
+</div>
+
+@code {
+    private static readonly string[] ColLabels = { "Upgrade Name", "Description", "Effect", "Owned", "Cost", "Action" };
+
+    [Parameter] public TaskTab Tab { get; set; } = null!;
+    [Parameter] public GameResources Resources { get; set; } = null!;
+    [Parameter] public IReadOnlyDictionary<string, int> OwnedByUpgradeId { get; set; } = null!;
+    [Parameter] public EventCallback<(string upgradeId, double cost)> OnBuy { get; set; }
+}

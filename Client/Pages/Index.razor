@@ -1,0 +1,49 @@
+@page "/"
+@using BG.Client.Data
+@inject GameStateService GameState
+@implements IDisposable
+
+<PageTitle>Spreadsheet Clicker</PageTitle>
+
+<div class="app">
+    <h1 class="app-title">Spreadsheet Clicker</h1>
+    <div class="spreadsheet-wrapper">
+        <div class="resource-display">
+            <strong>@ResourceLabel:</strong> @Math.Floor(ResourceValue).ToString("N0")
+            <span style="opacity: 0.8">(+@PerSecondValue.ToString("F1")/sec)</span>
+        </div>
+        <TabBar Tabs="TabsData.TaskTabs"
+                ActiveTabId="@GameState.ActiveTabId"
+                OnTabChange="@OnTabChange" />
+        <Spreadsheet Tab="@ActiveTab"
+                    Resources="@GameState.Resources"
+                    OwnedByUpgradeId="@GameState.OwnedByUpgradeId"
+                    OnBuy="@HandleBuy" />
+    </div>
+</div>
+
+@code {
+    private TaskTab ActiveTab => TabsData.TaskTabs.FirstOrDefault(t => t.Id == GameState.ActiveTabId) ?? TabsData.TaskTabs[0];
+    private string ResourceLabel => ActiveTab.Id == "emails" ? "Emails" : "Reports";
+    private double ResourceValue => ActiveTab.ResourceKey == "emailsProcessed" ? GameState.Resources.EmailsProcessed : GameState.Resources.ReportsDone;
+    private double PerSecondValue => ActiveTab.PerSecondKey == "emailsPerSecond" ? GameState.PerSecond.EmailsPerSecond : GameState.PerSecond.ReportsPerSecond;
+
+    protected override void OnInitialized()
+    {
+        GameState.ComputePerSecond();
+        GameState.OnChange += () => _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void OnTabChange(string tabId)
+    {
+        GameState.ActiveTabId = tabId;
+        StateHasChanged();
+    }
+
+    private void HandleBuy((string upgradeId, double cost) args)
+    {
+        GameState.Buy(args.upgradeId, args.cost);
+    }
+
+    public void Dispose() => GameState.OnChange -= StateHasChanged;
+}
