@@ -265,7 +265,6 @@ html, body.excel-theme {
 .sheet-grid {
     border-collapse: collapse;
     width: 100%;
-    max-width: 800px;
     background: var(--excel-cell-bg);
     color: #000;
 }
@@ -276,6 +275,7 @@ html, body.excel-theme {
     padding: 4px 8px;
     text-align: left;
     font-size: 11px;
+    min-width: 64px;
 }
 
 .sheet-grid thead th {
