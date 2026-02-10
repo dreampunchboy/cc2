@@ -1,32 +1,44 @@
 @page "/"
 @using BG.Client.Data
+@using BG.Client.Utils
 @inject GameStateService GameState
 @implements IDisposable
 
 <PageTitle>Spreadsheet Clicker</PageTitle>
 
-<div class="app">
-    <h1 class="app-title">Spreadsheet Clicker</h1>
-    <div class="spreadsheet-wrapper">
-        <div class="resource-display">
-            <strong>@ResourceLabel:</strong> @Math.Floor(ResourceValue).ToString("N0")
-            <span style="opacity: 0.8">(+@PerSecondValue.ToString("F1")/sec)</span>
-        </div>
-        <TabBar Tabs="TabsData.TaskTabs"
-                ActiveTabId="@GameState.ActiveTabId"
-                OnTabChange="@OnTabChange" />
-        <Spreadsheet Tab="@ActiveTab"
-                    Resources="@GameState.Resources"
-                    OwnedByUpgradeId="@GameState.OwnedByUpgradeId"
-                    OnBuy="@HandleBuy" />
-    </div>
-</div>
+<ExcelShell ResourceDisplay="@ResourceDisplay"
+            SelectedCellRef="@SelectedCellRef"
+            FormulaBarValue="@FormulaBarValue"
+            SheetTabsContent="@SheetTabsFragment">
+    <Spreadsheet Tab="@ActiveTab"
+                Resources="@GameState.Resources"
+                OwnedByUpgradeId="@GameState.OwnedByUpgradeId"
+                SelectedRow="@_selectedRow"
+                SelectedCol="@_selectedCol"
+                OnSelectionChanged="@OnSelectionChanged"
+                OnBuy="@HandleBuy" />
+</ExcelShell>
 
 @code {
+    private int _selectedRow = 1;
+    private int _selectedCol = 1;
+
     private TaskTab ActiveTab => TabsData.TaskTabs.FirstOrDefault(t => t.Id == GameState.ActiveTabId) ?? TabsData.TaskTabs[0];
     private string ResourceLabel => ActiveTab.Id == "emails" ? "Emails" : "Reports";
     private double ResourceValue => ActiveTab.ResourceKey == "emailsProcessed" ? GameState.Resources.EmailsProcessed : GameState.Resources.ReportsDone;
     private double PerSecondValue => ActiveTab.PerSecondKey == "emailsPerSecond" ? GameState.PerSecond.EmailsPerSecond : GameState.PerSecond.ReportsPerSecond;
+
+    private string ResourceDisplay => $"{ResourceLabel}: {Math.Floor(ResourceValue):N0} (+{PerSecondValue:F1}/sec)";
+    private string SelectedCellRef => GridUtils.GetCellRef(_selectedRow, _selectedCol);
+    private string FormulaBarValue => "";
+
+    private RenderFragment SheetTabsFragment => __builder =>
+    {
+        <TabBar Tabs="TabsData.TaskTabs"
+                ActiveTabId="@GameState.ActiveTabId"
+                OnTabChange="@OnTabChange"
+                UseSheetNames="true" />
+    };
 
     protected override void OnInitialized()
     {
@@ -37,6 +49,13 @@
     private void OnTabChange(string tabId)
     {
         GameState.ActiveTabId = tabId;
+        StateHasChanged();
+    }
+
+    private void OnSelectionChanged((int row, int col) selection)
+    {
+        _selectedRow = selection.row;
+        _selectedCol = selection.col;
         StateHasChanged();
     }
 

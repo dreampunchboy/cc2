@@ -1,0 +1,131 @@
+@* Excel-style shell: title bar, ribbon, formula bar, sheet tabs, status bar *@
+<div class="excel-window">
+    <header class="excel-title-bar">
+        <div class="excel-title-bar__left">
+            <span class="excel-title-bar__autosave">AutoSave</span>
+            <span class="excel-title-bar__autosave-off">Off</span>
+            <button type="button" class="excel-title-bar__icon" title="Save" aria-label="Save">💾</button>
+            <button type="button" class="excel-title-bar__icon" title="Undo" aria-label="Undo">↶</button>
+            <button type="button" class="excel-title-bar__icon" title="Redo" aria-label="Redo">↷</button>
+        </div>
+        <div class="excel-title-bar__center">Book1 - Excel</div>
+        <div class="excel-title-bar__right">
+            <span class="excel-title-bar__resource">@ResourceDisplay</span>
+            <div class="excel-title-bar__search">Search</div>
+            <button type="button" class="excel-title-bar__share">Share</button>
+            <button type="button" class="excel-title-bar__win" aria-label="Minimize">─</button>
+            <button type="button" class="excel-title-bar__win" aria-label="Maximize">□</button>
+            <button type="button" class="excel-title-bar__win" aria-label="Close">✕</button>
+        </div>
+    </header>
+
+    <div class="excel-ribbon">
+        <div class="excel-ribbon__tabs">
+            <span class="excel-ribbon__tab">File</span>
+            <span class="excel-ribbon__tab excel-ribbon__tab--active">Home</span>
+            <span class="excel-ribbon__tab">Insert</span>
+            <span class="excel-ribbon__tab">Draw</span>
+            <span class="excel-ribbon__tab">Page Layout</span>
+            <span class="excel-ribbon__tab">Formulas</span>
+            <span class="excel-ribbon__tab">Data</span>
+            <span class="excel-ribbon__tab">Review</span>
+            <span class="excel-ribbon__tab">View</span>
+            <span class="excel-ribbon__tab">Automate</span>
+            <span class="excel-ribbon__tab">Help</span>
+        </div>
+        <div class="excel-ribbon__content">
+            <div class="excel-ribbon__group">
+                <span class="excel-ribbon__group-label">Clipboard</span>
+                <div class="excel-ribbon__icons">
+                    <span class="excel-ribbon__icon" title="Paste">📋</span>
+                    <span class="excel-ribbon__icon" title="Cut">✂</span>
+                    <span class="excel-ribbon__icon" title="Copy">📄</span>
+                    <span class="excel-ribbon__icon" title="Format Painter">🖌</span>
+                </div>
+            </div>
+            <div class="excel-ribbon__group">
+                <span class="excel-ribbon__group-label">Font</span>
+                <div class="excel-ribbon__icons">
+                    <span class="excel-ribbon__font-name">Aptos Narrow</span>
+                    <span class="excel-ribbon__font-size">11</span>
+                    <span class="excel-ribbon__icon">B</span>
+                    <span class="excel-ribbon__icon">I</span>
+                    <span class="excel-ribbon__icon">U</span>
+                </div>
+            </div>
+            <div class="excel-ribbon__group">
+                <span class="excel-ribbon__group-label">Alignment</span>
+                <div class="excel-ribbon__icons">
+                    <span class="excel-ribbon__icon">≡</span>
+                    <span class="excel-ribbon__icon">≣</span>
+                    <span class="excel-ribbon__icon">⊞</span>
+                </div>
+            </div>
+            <div class="excel-ribbon__group">
+                <span class="excel-ribbon__group-label">Number</span>
+                <div class="excel-ribbon__icons">
+                    <span class="excel-ribbon__icon">General</span>
+                    <span class="excel-ribbon__icon">$</span>
+                    <span class="excel-ribbon__icon">%</span>
+                </div>
+            </div>
+            <div class="excel-ribbon__group">
+                <span class="excel-ribbon__group-label">Styles</span>
+                <div class="excel-ribbon__icons">
+                    <span class="excel-ribbon__icon">Conditional Formatting</span>
+                    <span class="excel-ribbon__icon">Format as Table</span>
+                </div>
+            </div>
+            <div class="excel-ribbon__group">
+                <span class="excel-ribbon__group-label">Cells</span>
+                <div class="excel-ribbon__icons">
+                    <span class="excel-ribbon__icon">Insert</span>
+                    <span class="excel-ribbon__icon">Delete</span>
+                    <span class="excel-ribbon__icon">Format</span>
+                </div>
+            </div>
+            <div class="excel-ribbon__group">
+                <span class="excel-ribbon__group-label">Editing</span>
+                <div class="excel-ribbon__icons">
+                    <span class="excel-ribbon__icon">Σ Sum</span>
+                    <span class="excel-ribbon__icon">Fill</span>
+                    <span class="excel-ribbon__icon">Clear</span>
+                    <span class="excel-ribbon__icon">Sort & Filter</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="excel-formula-bar">
+        <div class="excel-formula-bar__name-box" title="Name Box">@SelectedCellRef</div>
+        <button type="button" class="excel-formula-bar__btn" aria-label="Cancel">×</button>
+        <button type="button" class="excel-formula-bar__btn" aria-label="Enter">✓</button>
+        <button type="button" class="excel-formula-bar__fx" aria-label="Insert Function">fx</button>
+        <div class="excel-formula-bar__input">@FormulaBarValue</div>
+    </div>
+
+    <div class="excel-grid-area">
+        @ChildContent
+    </div>
+
+    <div class="excel-sheet-bar">
+        <div class="excel-sheet-bar__tabs">
+            <button type="button" class="excel-sheet-bar__nav" aria-label="Previous sheet">‹</button>
+            <button type="button" class="excel-sheet-bar__nav" aria-label="Next sheet">›</button>
+            @SheetTabsContent
+            <button type="button" class="excel-sheet-bar__add" aria-label="Insert sheet">+</button>
+        </div>
+        <div class="excel-status-bar">
+            <span class="excel-status-bar__view">Ready</span>
+            <span class="excel-status-bar__zoom">100%</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public RenderFragment? SheetTabsContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string ResourceDisplay { get; set; } = "";
+    [Parameter] public string SelectedCellRef { get; set; } = "A1";
+    [Parameter] public string FormulaBarValue { get; set; } = "";
+}
